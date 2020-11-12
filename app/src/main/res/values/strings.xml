@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Database</string>
+
+    <string-array name="bloodgroup">
+        <item>Select Blood Group</item>
+        <item>O+ve</item>
+        <item>O-ve</item>
+        <item>A+ve</item>
+        <item>A-ve</item>
+        <item>B+ve</item>
+        <item>B-ve</item>
+        <item>AB+ve</item>
+        <item>AB-ve</item>
+        <item>Bombay Blood Group</item>
+    </string-array>
+</resources>
