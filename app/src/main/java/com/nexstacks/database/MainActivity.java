@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,7 +23,11 @@ public class MainActivity extends AppCompatActivity {
     private EditText mEtEmployeePhoneNumber;
     private EditText mEtEmployeeDesignation;
 
+    private Spinner spnBloodGroup;
+
     private String selectedBloodGroup = "";
+
+    private DatabaseHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         mEtEmployeeEmail = findViewById(R.id.et_emp_mail);
         mEtEmployeePhoneNumber = findViewById(R.id.et_emp_phone_number);
         mEtEmployeeDesignation = findViewById(R.id.et_emp_desingation);
-        Spinner spnBloodGroup = findViewById(R.id.spn_bloodgroup);
+        spnBloodGroup = findViewById(R.id.spn_bloodgroup);
         final String[] bloodGroups = getResources().getStringArray(R.array.bloodgroup);
 
         ArrayAdapter<String> bloodGroupAdapter = new ArrayAdapter<String>(MainActivity.this, R.layout.spinner_custom,
@@ -54,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        dbHelper = new DatabaseHelper(MainActivity.this);
     }
 
     public void onEnterEmployeeClicked(View view){
@@ -67,11 +74,32 @@ public class MainActivity extends AppCompatActivity {
         Employee newEmp = new Employee();
         newEmp.setEmployeeID(empID);
         newEmp.setEmployeeName(empName);
+        newEmp.setEmployeeEmail(empEmail);
+        newEmp.setEmployeePhoneNumber(empPhoneNo);
+        newEmp.setEmployeeDesignation(empDesignation);
+        newEmp.setEmployeeBloodGroup(selectedBloodGroup);
 
 
-        Intent viewIntent = new Intent(MainActivity.this, ViewActivity.class);
-        viewIntent.putExtra("EMPLOYEE", newEmp);
-        startActivity(viewIntent);
+        dbHelper.insertDataToDatabase(dbHelper.getWritableDatabase(),newEmp);
+
+        mEtEmployeeID.setText("");
+        mEtEmployeeName.setText("");
+        mEtEmployeeEmail.setText("");
+        mEtEmployeePhoneNumber.setText("");
+        mEtEmployeeDesignation.setText("");
+
+
+        spnBloodGroup.setSelection(0);
+
+
+        ArrayList<Employee> enteredEmployeeInfo = dbHelper.getEmployeesFromDatabase(dbHelper.getReadableDatabase());
+
+        Toast.makeText(MainActivity.this, "No of data in database"+enteredEmployeeInfo.size(), Toast.LENGTH_LONG).show();
+        Log.i("DATA In DATABASE", String.valueOf(enteredEmployeeInfo.size()));
+
+//        Intent viewIntent = new Intent(MainActivity.this, ViewActivity.class);
+//        viewIntent.putExtra("EMPLOYEE", newEmp);
+//        startActivity(viewIntent);
 //        viewIntent.putExtra("EMPID", empID);
 //        viewIntent.putExtra("EMPNAME", empName);
 
