@@ -76,7 +76,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 employeeInfo.setEmployeeID(cursor.getString(cursor.getColumnIndex(COL_EMP_ID)));
                 employeeInfo.setEmployeeName(cursor.getString(cursor.getColumnIndex(COL_EMP_NAME)));
                 employeeInfo.setEmployeePhoneNumber((long) cursor.getInt(cursor.getColumnIndex(COL_EMP_MOB)));
-
+                employeeInfo.setEmployeeDesignation(cursor.getString(cursor.getColumnIndex(COL_EMP_DESN)));
+                employeeInfo.setEmployeeBloodGroup(cursor.getString(cursor.getColumnIndex(COL_EMP_BLOOD)));
                 employeeList.add(employeeInfo);
             }while(cursor.moveToNext());
         }
