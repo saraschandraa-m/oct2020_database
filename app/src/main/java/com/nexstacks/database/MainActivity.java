@@ -2,12 +2,14 @@ package com.nexstacks.database;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -16,6 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    public static final String BUNDLE_IS_EDIT = "is_edit";
+    public static final String BUNDLE_EMPLOYEE = "employee";
 
     private EditText mEtEmployeeID;
     private EditText mEtEmployeeName;
@@ -29,6 +34,9 @@ public class MainActivity extends AppCompatActivity {
 
     private DatabaseHelper dbHelper;
 
+    private boolean isEdit = false;
+    private Employee editEmployeeInfo;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +49,15 @@ public class MainActivity extends AppCompatActivity {
         mEtEmployeeDesignation = findViewById(R.id.et_emp_desingation);
         spnBloodGroup = findViewById(R.id.spn_bloodgroup);
         final String[] bloodGroups = getResources().getStringArray(R.array.bloodgroup);
+
+        Button mBtnInput = findViewById(R.id.btn_input);
+
+        Bundle data = getIntent().getExtras();
+
+        if(data != null){
+            isEdit = data.getBoolean(BUNDLE_IS_EDIT);
+            editEmployeeInfo = (Employee) data.getSerializable(BUNDLE_EMPLOYEE);
+        }
 
         ArrayAdapter<String> bloodGroupAdapter = new ArrayAdapter<String>(MainActivity.this, R.layout.spinner_custom,
                 R.id.spinner_text, bloodGroups);
@@ -61,6 +78,27 @@ public class MainActivity extends AppCompatActivity {
         });
 
         dbHelper = new DatabaseHelper(MainActivity.this);
+
+        if(isEdit && editEmployeeInfo != null){
+            mEtEmployeeID.setText(editEmployeeInfo.getEmployeeID());
+            mEtEmployeeDesignation.setText(editEmployeeInfo.getEmployeeDesignation());
+            mEtEmployeeName.setText(editEmployeeInfo.getEmployeeName());
+            mEtEmployeeEmail.setText(editEmployeeInfo.getEmployeeEmail());
+            mEtEmployeePhoneNumber.setText(String.valueOf(editEmployeeInfo.getEmployeePhoneNumber()));
+
+//            for (String val : bloodGroups){
+//
+//            }
+
+            for (int i=0; i<bloodGroups.length; i++){
+                String blood = bloodGroups[i];
+                if(blood.equals(editEmployeeInfo.getEmployeeBloodGroup())){
+                    spnBloodGroup.setSelection(i);
+                }
+            }
+
+            mBtnInput.setText("Edit Employee");
+        }
     }
 
     public void onEnterEmployeeClicked(View view){
@@ -78,9 +116,15 @@ public class MainActivity extends AppCompatActivity {
         newEmp.setEmployeePhoneNumber(empPhoneNo);
         newEmp.setEmployeeDesignation(empDesignation);
         newEmp.setEmployeeBloodGroup(selectedBloodGroup);
+        if(isEdit){
+            newEmp.setId(editEmployeeInfo.getId());
+            dbHelper.updateEmployee(newEmp, dbHelper.getWritableDatabase());
+        }else{
+            dbHelper.insertDataToDatabase(dbHelper.getWritableDatabase(),newEmp);
+        }
 
 
-        dbHelper.insertDataToDatabase(dbHelper.getWritableDatabase(),newEmp);
+
 
         mEtEmployeeID.setText("");
         mEtEmployeeName.setText("");
@@ -92,10 +136,13 @@ public class MainActivity extends AppCompatActivity {
         spnBloodGroup.setSelection(0);
 
 
-        ArrayList<Employee> enteredEmployeeInfo = dbHelper.getEmployeesFromDatabase(dbHelper.getReadableDatabase());
+        setResult(Activity.RESULT_OK);
+        finish();
 
-        Toast.makeText(MainActivity.this, "No of data in database"+enteredEmployeeInfo.size(), Toast.LENGTH_LONG).show();
-        Log.i("DATA In DATABASE", String.valueOf(enteredEmployeeInfo.size()));
+//        ArrayList<Employee> enteredEmployeeInfo = dbHelper.getEmployeesFromDatabase(dbHelper.getReadableDatabase());
+//
+//        Toast.makeText(MainActivity.this, "No of data in database"+enteredEmployeeInfo.size(), Toast.LENGTH_LONG).show();
+//        Log.i("DATA In DATABASE", String.valueOf(enteredEmployeeInfo.size()));
 
 //        Intent viewIntent = new Intent(MainActivity.this, ViewActivity.class);
 //        viewIntent.putExtra("EMPLOYEE", newEmp);
@@ -103,5 +150,10 @@ public class MainActivity extends AppCompatActivity {
 //        viewIntent.putExtra("EMPID", empID);
 //        viewIntent.putExtra("EMPNAME", empName);
 
+    }
+
+    public void onCancelClicked(View view){
+        setResult(Activity.RESULT_CANCELED);
+        finish();
     }
 }

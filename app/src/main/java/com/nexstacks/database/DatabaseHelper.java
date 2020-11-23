@@ -75,6 +75,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 employeeInfo.setId(cursor.getInt(cursor.getColumnIndex(COL_ID)));
                 employeeInfo.setEmployeeID(cursor.getString(cursor.getColumnIndex(COL_EMP_ID)));
                 employeeInfo.setEmployeeName(cursor.getString(cursor.getColumnIndex(COL_EMP_NAME)));
+                employeeInfo.setEmployeeEmail(cursor.getString(cursor.getColumnIndex(COL_EMP_EMAIL)));
                 employeeInfo.setEmployeePhoneNumber((long) cursor.getInt(cursor.getColumnIndex(COL_EMP_MOB)));
                 employeeInfo.setEmployeeDesignation(cursor.getString(cursor.getColumnIndex(COL_EMP_DESN)));
                 employeeInfo.setEmployeeBloodGroup(cursor.getString(cursor.getColumnIndex(COL_EMP_BLOOD)));
@@ -83,5 +84,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         return employeeList;
+    }
+
+    public void deleteEmployee(Employee employee, SQLiteDatabase database){
+        database.delete(TABLE_NAME, COL_ID +"="+employee.getId(), null);
+    }
+
+    public void updateEmployee(Employee employee, SQLiteDatabase database){
+        ContentValues cv = new ContentValues();
+        cv.put(COL_EMP_ID, employee.getEmployeeID());
+        cv.put(COL_EMP_NAME, employee.getEmployeeName());
+        cv.put(COL_EMP_MOB, employee.getEmployeePhoneNumber());
+        cv.put(COL_EMP_EMAIL, employee.getEmployeeEmail());
+        cv.put(COL_EMP_BLOOD, employee.getEmployeeBloodGroup());
+        cv.put(COL_EMP_DESN, employee.getEmployeeDesignation());
+
+        database.update(TABLE_NAME,cv, COL_ID+"="+employee.getId(), null );
     }
 }

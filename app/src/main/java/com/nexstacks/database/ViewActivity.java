@@ -1,11 +1,14 @@
 package com.nexstacks.database;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -14,7 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 
-public class ViewActivity extends AppCompatActivity {
+public class ViewActivity extends AppCompatActivity implements EmployeeListAdapter.EmployeeClickListener {
 
     private DatabaseHelper dbHelper;
 
@@ -48,13 +51,44 @@ public class ViewActivity extends AppCompatActivity {
     }
 
 
+    public void onAddEmployeeClicked(View view) {
+        startActivityForResult(new Intent(ViewActivity.this, MainActivity.class), 134);
+    }
 
 
-    private void setDataToAdapter(){
+    private void setDataToAdapter() {
         ArrayList<Employee> employees = dbHelper.getEmployeesFromDatabase(dbHelper.getReadableDatabase());
 
         EmployeeListAdapter adapter = new EmployeeListAdapter(ViewActivity.this, employees);
-
+        adapter.setListener(ViewActivity.this);
         mRcEmployees.setAdapter(adapter);
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 134 && resultCode == Activity.RESULT_OK) {
+            setDataToAdapter();
+        } else if (requestCode == 190 && resultCode == Activity.RESULT_OK) {
+            setDataToAdapter();
+        }
+    }
+
+    @Override
+    public void onEditEmployeeClicked(Employee employee) {
+//        Toast.makeText(ViewActivity.this, "Edit Clicked", Toast.LENGTH_LONG).show();
+        Intent editIntent = new Intent(ViewActivity.this, MainActivity.class);
+        editIntent.putExtra(MainActivity.BUNDLE_IS_EDIT, true);
+        editIntent.putExtra(MainActivity.BUNDLE_EMPLOYEE, employee);
+        startActivityForResult(editIntent, 190);
+    }
+
+    @Override
+    public void onDeleteEmployeeClicked(Employee employee) {
+//        Toast.makeText(ViewActivity.this, "Delete Clicked", Toast.LENGTH_LONG).show();
+
+        dbHelper.deleteEmployee(employee, dbHelper.getWritableDatabase());
+        setDataToAdapter();
+    }
+
 }
